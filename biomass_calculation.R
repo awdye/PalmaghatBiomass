@@ -92,6 +92,26 @@ ab.pm.all$annAB<-ab.pm.all$a*(ab.pm.all$dbhest2^ab.pm.all$b-ab.pm.all$dbhest1^ab
 #represents the entire hectare
 ab.pm.all$annAB.ha<-ab.pm.all$annAB*ab.pm.all$convha
 
+
+#Calculates total biomass per ha and number of trees
+#first we need to define two basic functions
+sum.fn<-function(x) sum(x, na.rm=TRUE)
+count.fn<-function(x) length(unique(x, na.rm=TRUE))
+
+ab.ha.site<-data.frame(tapply(X=ab.pm.all$annAB,INDEX=list(ab.pm.all$year,ab.pm.all$site),sum.fn))
+ab.ha.site$year<-as.numeric(as.character(row.names(ab.ha.site)))
+ab.ha.site[is.na(ab.ha.site)]=0
+
+n.trees<-data.frame(tapply(X=ab.pm.all$tree,INDEX=list(ab.pm.all$year,ab.pm.all$site),count.fn))
+n.trees$year<-as.numeric(as.character(row.names(n.trees)))
+plot(n.trees[,5])
+n.trees[is.na(n.trees)]=0
+
+
+
+#Calculations END HERE
+#From here on it's JUST GRAPHS
+
 p<-ggplot(data=ab.pm.all,aes(x=year, y=AB,color=species))
 p+geom_point(size=1)+facet_wrap(~site)
 
@@ -110,8 +130,6 @@ lineplot.CI(x.factor=year,response=meanRW,group=species,
 lineplot.CI(x.factor=year,response=annAB,group=site,
             data=subset(ab.pm.all,site!="PM4"&year>1960))
 
-sum.fn<-function(x) sum(x, na.rm=TRUE)
-count.fn<-function(x) length(unique(x, na.rm=TRUE))
 
 tot.ab.ha<-lineplot.CI(x.factor=year,response=annAB,group=site,
             data=subset(ab.pm.all,site!="PM4"&year>1960),fun=sum.fn,
@@ -120,14 +138,6 @@ axis(1,at=seq(1,60,5),labels=F)
 mtext(side=1,"Year",line=2)
 mtext(side=2,"Annual above-ground biomass (kg/ha)",line=2)
 
-ab.ha.site<-data.frame(tapply(X=ab.pm.all$annAB,INDEX=list(ab.pm.all$year,ab.pm.all$site),sum.fn))
-ab.ha.site$year<-as.numeric(as.character(row.names(ab.ha.site)))
-ab.ha.site[is.na(ab.ha.site)]=0
-
-n.trees<-data.frame(tapply(X=ab.pm.all$tree,INDEX=list(ab.pm.all$year,ab.pm.all$site),count.fn))
-n.trees$year<-as.numeric(as.character(row.names(n.trees)))
-plot(n.trees[,5])
-n.trees[is.na(n.trees)]=0
 
 ggplot(data=subset(ab.pm.all,site!="PM4"), 
        aes(y = annAB, x = year,color=site)) + 
